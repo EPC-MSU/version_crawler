@@ -1,0 +1,7 @@
+syntax: glob
+.idea/
+Crawl_results.txt
+syntax: regexp
+firmware/.*\.cod$
+firmware/.*\.txt$
+firmware/.*\.bat$

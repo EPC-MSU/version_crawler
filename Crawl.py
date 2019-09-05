@@ -7,6 +7,7 @@ Created on Sat Apr  6 14:43:47 2019
 
 import os
 from tkinter import *
+import threading
 
 # defaults hardcode definitions
 default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier'
@@ -34,11 +35,7 @@ gui_log_filename = AddField(window, 2, 'Log filename', default_log_filename)
 gui_regexp = AddField(window, 3, 'Regular expression', default_regexp)
 
 
-def clicked():
-    release = re.compile(gui_regexp.txt.get())
-    exclusions = gui_exclusions.txt.get().split()
-    root_dir = gui_path.txt.get()
-    log_filename = gui_log_filename.txt.get()
+def Crawl(reg_exp, exclusions, root_dir, log_filename):
     f = open(log_filename, 'w+')
     found = False
     for dirName, subdirList, fileList in os.walk(root_dir,
@@ -57,7 +54,7 @@ def clicked():
 
         CurrentDir = '\rFound in directory: {}\r\n'.format(dirName)
         for fname in fileList:
-            if (release.match(fname) != None):
+            if (reg_exp.match(fname) != None):
                 if (not Found):
                     sys.stdout.write(CurrentDir)
                     f.write('Found in directory: {}\n'.format(dirName))
@@ -70,6 +67,18 @@ def clicked():
     f.close()
 
 
+def clicked():
+    regexp = re.compile(gui_regexp.txt.get())
+    exclusions = gui_exclusions.txt.get().split()
+    root_dir = gui_path.txt.get()
+    log_filename = gui_log_filename.txt.get()
+    x = threading.Thread(target=Crawl, args=(regexp, exclusions, root_dir, log_filename))
+    x.daemon = True
+    x.start()
+    btn.config(state='disabled')
+
+
 btn = Button(window, text="Start crawl", command=clicked)
 btn.grid(column=0, row=4)
 window.mainloop()
+exit()

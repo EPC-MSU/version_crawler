@@ -14,6 +14,7 @@ default_path = 'z:\\'
 default_log_filename = 'Crawl_results.txt'
 default_regexp = '^([\w\d])+-(\d+\.\d+\.\d+)+(\.[a-z\d]{1,4})?(-[a-z\d\._]+)?(\.(zip|cod|json|txt|img|7z))?$'
 
+
 class AddField:
     def __init__(self, wnd, row_num, field_label, default_text):
         self.lbl = Label(wnd, text=field_label)
@@ -23,6 +24,7 @@ class AddField:
         self.txt.configure()
         self.txt.insert(INSERT, default_text)
 
+
 window = Tk()
 window.title('Version crawler')
 window.geometry('750x200')
@@ -31,21 +33,22 @@ gui_path = AddField(window, 1, 'Default path', default_path)
 gui_log_filename = AddField(window, 2, 'Log filename', default_log_filename)
 gui_regexp = AddField(window, 3, 'Regular expression', default_regexp)
 
+
 def clicked():
     release = re.compile(gui_regexp.txt.get())
     exclusions = gui_exclusions.txt.get().split()
-    RootDir = gui_path.txt.get()
+    root_dir = gui_path.txt.get()
     log_filename = gui_log_filename.txt.get()
     f = open(log_filename, 'w+')
-    Found = False
-    for dirName, subdirList, fileList in os.walk(RootDir,
+    found = False
+    for dirName, subdirList, fileList in os.walk(root_dir,
                                                  topdown=True):  # topdown must be true for exclusion subdirs to work
         # Filtering bad dirs
         for index, subdir in enumerate(subdirList):
             for ex in exclusions:
-                if (ex in subdir):
+                if ex in subdir:
                     subdirList.remove(subdir)
-        if (not Found):
+        if not found:
             sys.stdout.write("\rScanning directory {}".format(dirName))
         else:
             sys.stdout.write("Scanning directory {}".format(dirName))
@@ -65,6 +68,7 @@ def clicked():
     sys.stdout.write('\r ')  # To delete last string
     sys.stdout.flush()
     f.close()
+
 
 btn = Button(window, text="Start crawl", command=clicked)
 btn.grid(column=0, row=4)

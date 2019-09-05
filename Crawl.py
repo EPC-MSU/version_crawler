@@ -7,6 +7,7 @@ Created on Sat Apr  6 14:43:47 2019
 
 import os
 from tkinter import *
+from tkinter import filedialog
 import threading
 
 # defaults hardcode definitions
@@ -17,21 +18,29 @@ default_regexp = '^([\w\d])+-(\d+\.\d+\.\d+)+(\.[a-z\d]{1,4})?(-[a-z\d\._]+)?(\.
 
 
 class AddField:
-    def __init__(self, wnd, row_num, field_label, default_text):
+    def __init__(self, wnd, row_num, field_label, default_text, file = False):
         self.lbl = Label(wnd, text=field_label)
         self.lbl.grid(column=0, row=row_num)
-        self.txt = Entry(wnd, width=100)
+        self.txt = Entry(wnd, width=90)
         self.txt.grid(column=1, row=row_num)
         self.txt.configure()
         self.txt.insert(INSERT, default_text)
+        if file:
+            self.ofd = Button(wnd, text="Select file ...", command=self.ofd_click)
+            self.ofd.grid(column = 2, row = row_num)
+    def ofd_click(self):
+        filename = filedialog.askopenfilename(title="Select file", filetypes=(("all files", "*.*"),))
+        self.txt.delete(0, END)
+        self.txt.insert(INSERT, filename)
+
 
 
 window = Tk()
 window.title('Version crawler')
 window.geometry('750x200')
 gui_exclusions = AddField(window, 0, 'Exclusions', default_exclusions)
-gui_path = AddField(window, 1, 'Default path', default_path)
-gui_log_filename = AddField(window, 2, 'Log filename', default_log_filename)
+gui_path = AddField(window, 1, 'Default path', default_path, True)
+gui_log_filename = AddField(window, 2, 'Log filename', default_log_filename, True)
 gui_regexp = AddField(window, 3, 'Regular expression', default_regexp)
 
 

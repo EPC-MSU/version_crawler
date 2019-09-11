@@ -11,7 +11,7 @@ from tkinter import filedialog
 import threading
 
 # defaults hardcode definitions
-default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier'
+default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents'
 default_path = 'z:\\'
 default_log_filename_good = 'Crawl_results_good.txt'
 default_log_filename_bad = 'Crawl_results_bad.txt'
@@ -20,20 +20,32 @@ default_regexp_bad = '^([A-Za-z_\d])+.?(\d+\.\d+\.\d+)(.[A-Za-z\d_]+)?(.[\(\)A-Z
 
 
 class AddField:
-    def __init__(self, wnd, row_num, field_label, default_text, file = False):
+    def __init__(self, wnd, row_num, field_label, default_text, file_dialog = None):
         self.lbl = Label(wnd, text=field_label)
         self.lbl.grid(column=0, row=row_num)
         self.txt = Entry(wnd, width=110)
         self.txt.grid(column=1, row=row_num)
         self.txt.configure()
         self.txt.insert(INSERT, default_text)
-        if file:
-            self.ofd = Button(wnd, text="Select file ...", command=self.ofd_click)
+        if file_dialog != None:
+            if file_dialog == 'file':
+                self.ofd = Button(wnd, text="Select file ...", command=self.ofd_click)
+            elif file_dialog == 'directory':
+                self.ofd = Button(wnd, text="Select folder ...", command=self.od_click)
+            else:
+                self.ofd = Button(wnd, text="Unknown", command='')
             self.ofd.grid(column = 2, row = row_num)
+
     def ofd_click(self):
         filename = filedialog.askopenfilename(title="Select file", filetypes=(("all files", "*.*"),))
+        filedialog.askdirectory(title='Select folder')
         self.txt.delete(0, END)
         self.txt.insert(INSERT, filename)
+
+    def od_click(self):
+        folder = filedialog.askdirectory(title='Select folder')
+        self.txt.delete(0, END)
+        self.txt.insert(INSERT, folder)
 
 
 
@@ -41,12 +53,12 @@ window = Tk()
 window.title('Version crawler')
 window.geometry('900x200')
 gui_exclusions = AddField(window, 0, 'Exclusions', default_exclusions)
-gui_path = AddField(window, 1, 'Default path', default_path, True)
-gui_log_filename_good = AddField(window, 2, 'Log filename', default_log_filename_good, True)
+gui_path = AddField(window, 1, 'Default path', default_path, 'directory')
+gui_log_filename_good = AddField(window, 2, 'Log filename', default_log_filename_good, 'file')
 gui_regexp_good = AddField(window, 3, 'Correct regexp', default_regexp_good)
 lbl = Label(window, text="Bad regexp allows to find close to correct names that do not comply with good regexp")
 lbl.grid(column=1, row=4)
-gui_log_filename_bad = AddField(window, 5, 'Log filename', default_log_filename_bad, True)
+gui_log_filename_bad = AddField(window, 5, 'Log filename', default_log_filename_bad, 'file')
 gui_regexp_bad = AddField(window, 6, 'Bad regexp', default_regexp_bad)
 
 

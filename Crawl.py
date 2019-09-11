@@ -11,7 +11,7 @@ from tkinter import filedialog
 import threading
 
 # defaults hardcode definitions
-default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents'
+default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt'
 default_path = 'z:\\'
 default_log_filename_good = 'Crawl_results_good.txt'
 default_log_filename_bad = 'Crawl_results_bad.txt'

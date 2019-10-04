@@ -62,12 +62,14 @@ gui_log_filename_bad = AddField(window, 5, 'Log filename', default_log_filename_
 gui_regexp_bad = AddField(window, 6, 'Bad regexp', default_regexp_bad)
 
 
-def Crawl(reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad, log_filename_bad):
+def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad, log_filename_bad):
     f_good = open(log_filename_good, 'w+')
     f_bad = open(log_filename_bad, 'w+')
     found = False
     for dirName, subdirList, fileList in os.walk(root_dir,
                                                  topdown=True):  # topdown must be true for exclusion subdirs to work
+        if (event.isSet()):
+            break
         # Filtering bad dirs
         for index, subdir in enumerate(subdirList):
             for ex in exclusions:
@@ -83,6 +85,8 @@ def Crawl(reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad, lo
 
         CurrentDir = '\rFound in directory: {}\r\n'.format(dirName)
         for fname in fileList:
+            if (event.isSet()):
+                break
             if (reg_exp_bad.match(fname) != None) and (reg_exp_good.match(fname) == None):
                 if (not found_bad):
                     f_bad.write('Found in directory: {}\n'.format(dirName))
@@ -102,18 +106,25 @@ def Crawl(reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad, lo
     f_good.close()
     f_bad.close()
 
-
+event = threading.Event()
 def clicked():
-    regexp_good = re.compile(gui_regexp_good.txt.get())
-    regexp_bad = re.compile(gui_regexp_bad.txt.get())
-    exclusions = gui_exclusions.txt.get().split()
-    root_dir = gui_path.txt.get()
-    log_filename_good = gui_log_filename_good.txt.get()
-    log_filename_bad = gui_log_filename_bad.txt.get()
-    x = threading.Thread(target=Crawl, args=(regexp_good, exclusions, root_dir, log_filename_good, regexp_bad, log_filename_bad))
-    x.daemon = True
-    x.start()
-    btn.config(state='disabled')
+    if(btn["text"] == "Start crawl"):
+        event.clear() # no need to quit the thread
+        regexp_good = re.compile(gui_regexp_good.txt.get())
+        regexp_bad = re.compile(gui_regexp_bad.txt.get())
+        exclusions = gui_exclusions.txt.get().split()
+        root_dir = gui_path.txt.get()
+        log_filename_good = gui_log_filename_good.txt.get()
+        log_filename_bad = gui_log_filename_bad.txt.get()
+        x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good, regexp_bad, log_filename_bad))
+        x.daemon = True
+        x.start()
+        btn.config(text='Abort')
+    elif(btn["text"] == "Abort"):
+        event.set() # we need to quit the thread
+        btn.config(text='Start crawl')
+    else:
+        raise(Exception())
 
 
 btn = Button(window, text="Start crawl", command=clicked)

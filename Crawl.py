@@ -9,6 +9,21 @@ import os
 from tkinter import *
 from tkinter import filedialog
 import threading
+import configparser # Working with ini configuration files
+
+config = configparser.ConfigParser()
+config['main'] = {'exclusions': 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt',
+                  'startpath': 'z:\\',
+                  'CompressionLevel': '9'}
+config['logging'] = {'log_filename_good': 'Crawl_results_good.txt',
+                     'log_filename_bad': 'Crawl_results_bad.txt'}
+config['regexp'] = {'regexp_good': '^([\w\d])+-(\d+\.\d+\.\d+)+(\.[a-z\d]{1,4})?(-[a-z\d\._]+)?(\.(zip|cod|json|txt|img|7z))?$',
+                     'regexp_bad': '^([A-Za-z_\d])+.?(\d+\.\d+\.\d+)(.[A-Za-z\d_]+)?(.[\(\)A-Za-z_\d-]+(\.([\d]+|x))?(\.([\d]+|x))?)?(-\([a-z_\d]+\))?'}
+with open('default.ini', 'w') as configfile:
+  config.write(configfile)
+
+config = configparser.ConfigParser()
+config.read('defaut.ini')
 
 # defaults hardcode definitions
 default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt'

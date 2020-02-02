@@ -146,11 +146,11 @@ def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_
     sys.stdout.flush()
     f_good.close()
     f_bad.close()
-    btn.config(text='Start crawl')
+    btnStart.config(text='Start crawl')
 
 event = threading.Event()
 def clicked():
-    if(btn["text"] == "Start crawl"):
+    if(btnStart["text"] == "Start crawl"):
         event.clear() # no need to quit the thread
         regexp_good = re.compile(gui_regexp_good.txt.get())
         regexp_bad = re.compile(gui_regexp_bad.txt.get())
@@ -161,10 +161,10 @@ def clicked():
         x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good, regexp_bad, log_filename_bad))
         x.daemon = True
         x.start()
-        btn.config(text='Abort')
-    elif(btn["text"] == "Abort"):
+        btnStart.config(text='Abort')
+    elif(btnStart["text"] == "Abort"):
         event.set() # we need to quit the thread
-        btn.config(text='Start crawl')
+        btnStart.config(text='Start crawl')
     else:
         raise(Exception())
 
@@ -179,9 +179,9 @@ def Save():
     with open('default.ini', 'w') as configfile:
       config.write(configfile)
 
-btn = Button(window, text="Start crawl", command=clicked)
-btn.grid(column=0, row=7)
-btn = Button(window, text="Save config", command=Save)
-btn.grid(column=2, row=7)
+btnStart = Button(window, text="Start crawl", command=clicked)
+btnStart.grid(column=0, row=7)
+btnSave = Button(window, text="Save config", command=Save)
+btnSave.grid(column=2, row=7)
 window.mainloop()
 exit()

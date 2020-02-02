@@ -12,18 +12,7 @@ import threading
 import configparser # Working with ini configuration files
 
 config = configparser.ConfigParser()
-config['main'] = {'exclusions': 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt',
-                  'startpath': 'z:\\',
-                  'CompressionLevel': '9'}
-config['logging'] = {'log_filename_good': 'Crawl_results_good.txt',
-                     'log_filename_bad': 'Crawl_results_bad.txt'}
-config['regexp'] = {'regexp_good': '^([\w\d])+-(\d+\.\d+\.\d+)+(\.[a-z\d]{1,4})?(-[a-z\d\._]+)?(\.(zip|cod|json|txt|img|7z))?$',
-                     'regexp_bad': '^([A-Za-z_\d])+.?(\d+\.\d+\.\d+)(.[A-Za-z\d_]+)?(.[\(\)A-Za-z_\d-]+(\.([\d]+|x))?(\.([\d]+|x))?)?(-\([a-z_\d]+\))?'}
-with open('default.ini', 'w') as configfile:
-  config.write(configfile)
-
-config = configparser.ConfigParser()
-config.read('defaut.ini')
+config.read('default.ini')
 
 # defaults hardcode definitions
 default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt'
@@ -67,14 +56,51 @@ class AddField:
 window = Tk()
 window.title('Version crawler')
 window.geometry('900x200')
-gui_exclusions = AddField(window, 0, 'Exclusions', default_exclusions)
-gui_path = AddField(window, 1, 'Default path', default_path, 'directory')
-gui_log_filename_good = AddField(window, 2, 'Log filename', default_log_filename_good, 'file')
-gui_regexp_good = AddField(window, 3, 'Correct regexp', default_regexp_good)
+
+try:
+    exclusions = config['main']['exclusions']
+except:
+    print("Couldn't load exclusions in the main section of config file")
+    exclusions = default_exclusions
+gui_exclusions = AddField(window, 0, 'Exclusions', exclusions)
+
+try:
+    startpath = config['main']['startpath']
+except:
+    print("Couldn't load startpath in the main section of config file")
+    startpath = default_path
+gui_path = AddField(window, 1, 'Default path', startpath, 'directory')
+
+try:
+    log_filename_good = config['logging']['log_filename_good']
+except:
+    print("Couldn't load log_filename_good in the logging section of config file")
+    log_filename_good = default_log_filename_good
+gui_log_filename_good = AddField(window, 2, 'Log filename', log_filename_good, 'file')
+
+try:
+    regexp_good = config['regexp']['regexp_good']
+except:
+    print("Couldn't load regexp_good in the regexp section of config file")
+    regexp_good = default_regexp_good
+gui_regexp_good = AddField(window, 3, 'Correct regexp', regexp_good)
+
 lbl = Label(window, text="Bad regexp allows to find close to correct names that do not comply with good regexp")
 lbl.grid(column=1, row=4)
-gui_log_filename_bad = AddField(window, 5, 'Log filename', default_log_filename_bad, 'file')
-gui_regexp_bad = AddField(window, 6, 'Bad regexp', default_regexp_bad)
+
+try:
+    log_filename_bad = config['logging']['log_filename_bad']
+except:
+    print("Couldn't load log_filename_bad in the logging section of config file")
+    log_filename_bad = default_log_filename_bad
+gui_log_filename_bad = AddField(window, 5, 'Log filename', log_filename_bad, 'file')
+
+try:
+    regexp_bad = config['regexp']['regexp_bad']
+except:
+    print("Couldn't load regexp_bad in the regexp section of config file")
+    regexp_bad = default_regexp_bad
+gui_regexp_bad = AddField(window, 6, 'Bad regexp', regexp_bad)
 
 
 def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad, log_filename_bad):
@@ -120,6 +146,7 @@ def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_
     sys.stdout.flush()
     f_good.close()
     f_bad.close()
+    btn.config(text='Start crawl')
 
 event = threading.Event()
 def clicked():
@@ -141,8 +168,20 @@ def clicked():
     else:
         raise(Exception())
 
+def Save():
+    config = configparser.ConfigParser()
+    config['main'] = {'exclusions': gui_exclusions.txt.get(),
+                      'startpath': gui_path.txt.get()}
+    config['logging'] = {'log_filename_good': gui_log_filename_good.txt.get(),
+                         'log_filename_bad': gui_log_filename_bad.txt.get()}
+    config['regexp'] = {'regexp_good': gui_regexp_good.txt.get(),
+                         'regexp_bad': gui_regexp_bad.txt.get()}
+    with open('default.ini', 'w') as configfile:
+      config.write(configfile)
 
 btn = Button(window, text="Start crawl", command=clicked)
 btn.grid(column=0, row=7)
+btn = Button(window, text="Save config", command=Save)
+btn.grid(column=2, row=7)
 window.mainloop()
 exit()

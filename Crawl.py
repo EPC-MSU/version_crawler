@@ -103,9 +103,10 @@ except:
 gui_regexp_bad = AddField(window, 6, 'Bad regexp', regexp_bad)
 
 
-def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad, log_filename_bad):
+def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad = None, log_filename_bad = None):
     f_good = open(log_filename_good, 'w+')
-    f_bad = open(log_filename_bad, 'w+')
+    if log_filename_bad is not None:
+        f_bad = open(log_filename_bad, 'w+')
     found = False
     for dirName, subdirList, fileList in os.walk(root_dir,
                                                  topdown=True):  # topdown must be true for exclusion subdirs to work
@@ -128,7 +129,9 @@ def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_
         for fname in fileList:
             if (event.isSet()):
                 break
-            if (reg_exp_bad.match(fname) != None) and (reg_exp_good.match(fname) == None):
+            if (log_filename_bad is not None) and \
+                    (reg_exp_bad.match(fname) != None) and \
+                    (reg_exp_good.match(fname) == None):
                 if (not found_bad):
                     f_bad.write('Found in directory: {}\n'.format(dirName))
                     found_bad = True
@@ -145,7 +148,8 @@ def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_
     sys.stdout.write('\r ')  # To delete last string
     sys.stdout.flush()
     f_good.close()
-    f_bad.close()
+    if log_filename_bad is not None:
+        f_bad.close()
     btnStart.config(text='Start crawl')
 
 event = threading.Event()
@@ -158,7 +162,11 @@ def clicked():
         root_dir = gui_path.txt.get()
         log_filename_good = gui_log_filename_good.txt.get()
         log_filename_bad = gui_log_filename_bad.txt.get()
-        x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good, regexp_bad, log_filename_bad))
+        if len(log_filename_bad) == 0:
+            x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good))
+        else:
+            x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good,
+                                                     regexp_bad, log_filename_bad))
         x.daemon = True
         x.start()
         btnStart.config(text='Abort')

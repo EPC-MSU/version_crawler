@@ -18,5 +18,10 @@ python Crawl.py
 ^([a-zа-я_\d])+-(\d{1,2}\.\d{1,2}\.\d{1,2})(\.[a-zа-я\d]{1,4})?(-[a-zа-я_\d]+(\.([\d]+|x))?(\.([\d]+|x))?)?(-\([a-zа-я_\d]+\))?(\.(zip|7z|tar\.gz|cod|json|txt|exe|sh|rpm|jar|swu|img|bin|deb|pdf))$
 ```
 После этого необходимо нажать кнопку "Save config" и нажать "Start crawl".
-В итоге в файлах Crawl_results_bad.txt и Crawl_results_good.txt появятся названия плохо и хорошо именованных релизов соотвественно.
+В итоге в файлах Crawl_results_bad.txt и Crawl_results_good.txt появятся названия плохо и хорошо именованных релизов соответственно.
 
+# Выпуск бинарных релизов
+
+## Для Windows
+
+Чтобы создать исполняемый exe-файл `version crawler` нужно запустить скрипт `release.bat`. Исполнимый файл `Crawl.exe` будет находится в папке release. Туда же будут помещены файлы `default.ini` и `readme.md`.

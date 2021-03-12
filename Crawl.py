@@ -12,7 +12,7 @@ import threading
 import configparser # Working with ini configuration files
 
 config = configparser.ConfigParser()
-config.read('default.ini')
+config.read('default.ini', encoding='utf-8')
 
 # defaults hardcode definitions
 default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt'

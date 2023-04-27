@@ -9,10 +9,7 @@ import os
 from tkinter import *
 from tkinter import filedialog
 import threading
-import configparser # Working with ini configuration files
-
-config = configparser.ConfigParser()
-config.read('default.ini', encoding='utf-8')
+import configparser  # Working with ini configuration files
 
 # defaults hardcode definitions
 default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt'
@@ -56,6 +53,13 @@ class AddField:
 window = Tk()
 window.title('Version crawler')
 window.geometry('900x200')
+
+config = configparser.ConfigParser()
+configfilename = 'default.ini'
+try:
+    config.read(configfilename, encoding='utf-8')
+except:
+    print("Couldn't load config file " + configfilename)
 
 try:
     exclusions = config['main']['exclusions']
@@ -184,7 +188,7 @@ def Save():
                          'log_filename_bad': gui_log_filename_bad.txt.get()}
     config['regexp'] = {'regexp_good': gui_regexp_good.txt.get(),
                          'regexp_bad': gui_regexp_bad.txt.get()}
-    with open('default.ini', 'w') as configfile:
+    with open('default.ini', 'w', encoding='utf-8') as configfile:
       config.write(configfile)
 
 btnStart = Button(window, text="Start crawl", command=clicked)

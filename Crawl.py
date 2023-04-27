@@ -55,7 +55,6 @@ class AddField:
 
 window = Tk()
 window.title('Version crawler')
-window.geometry('900x200')
 
 config = configparser.ConfigParser()
 configfilename = 'default.ini'

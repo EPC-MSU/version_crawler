@@ -28,6 +28,16 @@ python Crawl.py
 
 ## Для Linux
 
+Если операционная система не настроена, то нужно выполнить:
+
+```bash
+sudo apt install git
+git clone https://github.com/EPC-MSU/version_crawler.git
+cd version_crawler/
+sudo apt install python3-tk python3-venv python3-dev python3-pip
+pip install eggs
+```
+
 Чтобы создать исполняемый бинарный файл, в терминале нужно выполнить команду:
 
 `source release.sh`

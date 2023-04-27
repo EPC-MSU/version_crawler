@@ -10,32 +10,36 @@ from tkinter import *
 from tkinter import filedialog
 import threading
 import configparser  # Working with ini configuration files
+import re
 
 # defaults hardcode definitions
 default_exclusions = 'snapshot ДОКУМЕНТЫ download.ximc.ru bombardier Documents Users Sites Scan Malt'
 default_path = 'z:\\'
 default_log_filename_good = 'Crawl_results_good.txt'
 default_log_filename_bad = 'Crawl_results_bad.txt'
-default_regexp_good = '^([\w\d])+-(\d+\.\d+\.\d+)+(\.[a-z\d]{1,4})?(-[a-z\d\._]+)?(\.(zip|cod|json|txt|img|7z))?$'
-default_regexp_bad = '^([A-Za-z_\d])+.?(\d+\.\d+\.\d+)(.[A-Za-z\d_]+)?(.[\(\)A-Za-z_\d-]+(\.([\d]+|x))?(\.([\d]+|x))?)?(-\([a-z_\d]+\))?'
+default_regexp_good = '^([a-z_\\d])+-(\\d{1,2}\\.\\d{1,2}\\.\\d{1,2})(\\.[a-z\\d]{1,4})?(-[a-z_\\d]+(\\.([\\d]+|x))?' \
+                      '(\\.([\\d]+|x))?)?(-\\([a-z_\\d]+\\))?' \
+                      '(\\.(zip|7z|tar\\.gz|cod|json|txt|exe|sh|rpm|jar|swu|img|bin|deb|pdf))$'
+default_regexp_bad = '^([A-Za-z_\\d])+.?(\\d+\\.\\d+\\.\\d+)(.[A-Za-z\\d_]+)?(.[\\(\\)A-Za-z_\\d-]+(\\.([\\d]+|x))?' \
+                     '(\\.([\\d]+|x))?)?(-\\([a-z_\\d]+\\))?'
 
 
 class AddField:
-    def __init__(self, wnd, row_num, field_label, default_text, file_dialog = None):
+    def __init__(self, wnd, row_num, field_label, default_text, file_dialog=None):
         self.lbl = Label(wnd, text=field_label)
         self.lbl.grid(column=0, row=row_num)
         self.txt = Entry(wnd, width=110)
         self.txt.grid(column=1, row=row_num)
         self.txt.configure()
         self.txt.insert(INSERT, default_text)
-        if file_dialog != None:
+        if file_dialog is not None:
             if file_dialog == 'file':
                 self.ofd = Button(wnd, text="Select file ...", command=self.ofd_click)
             elif file_dialog == 'directory':
                 self.ofd = Button(wnd, text="Select folder ...", command=self.od_click)
             else:
                 self.ofd = Button(wnd, text="Unknown", command='')
-            self.ofd.grid(column = 2, row = row_num)
+            self.ofd.grid(column=2, row=row_num)
 
     def ofd_click(self):
         filename = filedialog.askopenfilename(title="Select file", filetypes=(("all files", "*.*"),))
@@ -47,7 +51,6 @@ class AddField:
         folder = filedialog.askdirectory(title='Select folder')
         self.txt.delete(0, END)
         self.txt.insert(INSERT, folder)
-
 
 
 window = Tk()
@@ -107,14 +110,14 @@ except:
 gui_regexp_bad = AddField(window, 6, 'Bad regexp', regexp_bad)
 
 
-def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad = None, log_filename_bad = None):
+def crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad=None, log_filename_bad=None):
     f_good = open(log_filename_good, 'w+')
     if log_filename_bad is not None:
         f_bad = open(log_filename_bad, 'w+')
     found = False
     for dirName, subdirList, fileList in os.walk(root_dir,
                                                  topdown=True):  # topdown must be true for exclusion subdirs to work
-        if (event.isSet()):
+        if event.isSet():
             break
         # Filtering bad dirs
         for index, subdir in enumerate(subdirList):
@@ -122,44 +125,45 @@ def Crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_
                 if ex in subdir:
                     subdirList.remove(subdir)
         if not found:
-            sys.stdout.write("\rScanning directory {}".format(dirName))
+            print("\rScanning directory {}".format(dirName), end='', flush=True)
         else:
-            sys.stdout.write("Scanning directory {}".format(dirName))
-        sys.stdout.flush()
+            print("Scanning directory {}".format(dirName), end='', flush=True)
         found_good = False
         found_bad = False
 
-        CurrentDir = '\rFound in directory: {}\r\n'.format(dirName)
+        currentdir = '\rFound in directory: {}\r\n'.format(dirName)
         for fname in fileList:
-            if (event.isSet()):
+            if event.isSet():
                 break
             if (log_filename_bad is not None) and \
-                    (reg_exp_bad.match(fname) != None) and \
-                    (reg_exp_good.match(fname) == None):
-                if (not found_bad):
+                    (reg_exp_bad.match(fname) is not None) and \
+                    (reg_exp_good.match(fname) is None):
+                if not found_bad:
                     f_bad.write('Found in directory: {}\n'.format(dirName))
                     found_bad = True
                     f_bad.flush()
                 f_bad.write('\t{}\n'.format(fname))
-            if (reg_exp_good.match(fname) != None):
-                if (not found_good):
-                    sys.stdout.write(CurrentDir)
+            if reg_exp_good.match(fname) is not None:
+                if not found_good:
+                    print(currentdir, end='')
                     f_good.write('Found in directory: {}\n'.format(dirName))
                     found_good = True
                     f_good.flush()
-                sys.stdout.write('\t{}\r\n'.format(fname))
+                print('\t{}\r\n'.format(fname), end='')
                 f_good.write('\t{}\n'.format(fname))
-    sys.stdout.write('\r ')  # To delete last string
-    sys.stdout.flush()
+    print('\r ', end='', flush=True)
     f_good.close()
     if log_filename_bad is not None:
         f_bad.close()
     btnStart.config(text='Start crawl')
 
+
 event = threading.Event()
+
+
 def clicked():
-    if(btnStart["text"] == "Start crawl"):
-        event.clear() # no need to quit the thread
+    if btnStart["text"] == "Start crawl":
+        event.clear()  # no need to quit the thread
         regexp_good = re.compile(gui_regexp_good.txt.get())
         regexp_bad = re.compile(gui_regexp_bad.txt.get())
         exclusions = gui_exclusions.txt.get().split()
@@ -167,33 +171,35 @@ def clicked():
         log_filename_good = gui_log_filename_good.txt.get()
         log_filename_bad = gui_log_filename_bad.txt.get()
         if len(log_filename_bad) == 0:
-            x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good))
+            x = threading.Thread(target=crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good))
         else:
-            x = threading.Thread(target=Crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good,
+            x = threading.Thread(target=crawl, args=(event, regexp_good, exclusions, root_dir, log_filename_good,
                                                      regexp_bad, log_filename_bad))
         x.daemon = True
         x.start()
         btnStart.config(text='Abort')
-    elif(btnStart["text"] == "Abort"):
-        event.set() # we need to quit the thread
+    elif btnStart["text"] == "Abort":
+        event.set()  # we need to quit the thread
         btnStart.config(text='Start crawl')
     else:
         raise(Exception())
 
-def Save():
+
+def save():
     config = configparser.ConfigParser()
     config['main'] = {'exclusions': gui_exclusions.txt.get(),
                       'startpath': gui_path.txt.get()}
     config['logging'] = {'log_filename_good': gui_log_filename_good.txt.get(),
                          'log_filename_bad': gui_log_filename_bad.txt.get()}
     config['regexp'] = {'regexp_good': gui_regexp_good.txt.get(),
-                         'regexp_bad': gui_regexp_bad.txt.get()}
+                        'regexp_bad': gui_regexp_bad.txt.get()}
     with open('default.ini', 'w', encoding='utf-8') as configfile:
-      config.write(configfile)
+        config.write(configfile)
+
 
 btnStart = Button(window, text="Start crawl", command=clicked)
 btnStart.grid(column=0, row=7)
-btnSave = Button(window, text="Save config", command=Save)
+btnSave = Button(window, text="Save config", command=save)
 btnSave.grid(column=2, row=7)
 window.mainloop()
 exit()

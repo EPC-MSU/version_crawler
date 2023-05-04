@@ -110,9 +110,9 @@ gui_regexp_bad = AddField(window, 6, 'Bad regexp', regexp_bad)
 
 
 def crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_bad=None, log_filename_bad=None):
-    f_good = open(log_filename_good, 'w+')
+    f_good = open(log_filename_good, 'w+', encoding='utf-8')
     if log_filename_bad is not None:
-        f_bad = open(log_filename_bad, 'w+')
+        f_bad = open(log_filename_bad, 'w+', encoding='utf-8')
     found = False
     for dirName, subdirList, fileList in os.walk(root_dir,
                                                  topdown=True):  # topdown must be true for exclusion subdirs to work

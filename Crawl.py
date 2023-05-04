@@ -134,22 +134,25 @@ def crawl(event, reg_exp_good, exclusions, root_dir, log_filename_good, reg_exp_
         for fname in fileList:
             if event.isSet():
                 break
-            if (log_filename_bad is not None) and \
-                    (reg_exp_bad.match(fname) is not None) and \
-                    (reg_exp_good.match(fname) is None):
-                if not found_bad:
-                    f_bad.write('Found in directory: {}\n'.format(dirName))
-                    found_bad = True
-                    f_bad.flush()
-                f_bad.write('\t{}\n'.format(fname))
-            if reg_exp_good.match(fname) is not None:
-                if not found_good:
-                    print(currentdir, end='')
-                    f_good.write('Found in directory: {}\n'.format(dirName))
-                    found_good = True
-                    f_good.flush()
-                print('\t{}\r\n'.format(fname), end='')
-                f_good.write('\t{}\n'.format(fname))
+            try:
+                if (log_filename_bad is not None) and \
+                        (reg_exp_bad.match(fname) is not None) and \
+                        (reg_exp_good.match(fname) is None):
+                    if not found_bad:
+                        f_bad.write('Found in directory: {}\n'.format(dirName))
+                        found_bad = True
+                        f_bad.flush()
+                    f_bad.write('\t{}\n'.format(fname))
+                if reg_exp_good.match(fname) is not None:
+                    if not found_good:
+                        print(currentdir, end='')
+                        f_good.write('Found in directory: {}\n'.format(dirName))
+                        found_good = True
+                        f_good.flush()
+                    print('\t{}\r\n'.format(fname), end='')
+                    f_good.write('\t{}\n'.format(fname))
+            except Exception as e:
+                print('\r\nSkipping {} because of {}'.format(fname, e))
     print('\r ', end='', flush=True)
     f_good.close()
     if log_filename_bad is not None:
